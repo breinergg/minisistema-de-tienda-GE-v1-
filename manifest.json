@@ -1,0 +1,22 @@
+{
+  "name": "Sistema de Tienda Avanzado",
+  "short_name": "Tienda",
+  "description": "Sistema de Tienda Avanzado con conversores de pesos",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f2f5f7",
+  "theme_color": "#00796b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

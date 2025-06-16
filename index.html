@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sistema de Tienda GE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="./manifest.json">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f5f7;
+    }
+    header {
+      background: linear-gradient(45deg, #00796b, #004d40);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 1.8em;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+      gap: 15px;
+      background: #ffffff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .menu button {
+      padding: 15px 30px;
+      font-size: 1em;
+      border: none;
+      border-radius: 12px;
+      background: #009688;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .menu button:hover {
+      background: #00695c;
+    }
+    .seccion {
+      display: none;
+      max-width: 600px;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      font-size: 1em;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button.registrar {
+      width: 100%;
+      padding: 15px;
+      background: #4caf50;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .producto {
+      background: #eef2f3;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .producto button {
+      margin-left: 5px;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .editar { background: #ff9800; color: white; }
+    .eliminar { background: #f44336; color: white; }
+    .exportar {
+      background: #2196f3;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .row input {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+
+<header>Sistema de Tienda Avanzado</header>
+
+<div class="menu">
+  <button onclick="mostrarSeccion('registro')">Registrar Producto</button>
+  <button onclick="mostrarSeccion('conversores')">Conversores</button>
+  <button onclick="mostrarSeccion('lista')">Lista de Productos</button>
+</div>
+
+<div id="registro" class="seccion">
+  <h2>Registro de Productos</h2>
+  <div class="form-group">
+    <label>Nombre del Producto</label>
+    <input type="text" id="nombreProducto">
+  </div>
+  <div class="form-group">
+    <label>Precio</label>
+    <input type="number" id="precioProducto">
+  </div>
+  <div class="form-group">
+    <label>Unidad</label>
+    <select id="unidadProducto">
+      <option value="libra">Libra</option>
+      <option value="unidad">Unidad</option>
+      <option value="paquete">Paquete</option>
+      <option value="ml">Mililitros</option>
+      <option value="gramo">Gramos</option>
+      <option value="litro">Litro</option>
+    </select>
+  </div>
+  <input type="hidden" id="productoEditando" value="">
+  <button class="registrar" onclick="registrarProducto()">Guardar Producto</button>
+</div>
+
+<div id="conversores" class="seccion">
+  <h2>Conversores de Pesos</h2>
+
+  <div class="form-group">
+    <label>Conversor 1: Gramos → Precio</label>
+    <div class="row">
+      <input type="number" id="gramos" placeholder="Gramos">
+      <input type="number" id="precioLibra" placeholder="Precio por libra">
+    </div>
+    <button onclick="convertirGramosPrecio()">Calcular</button>
+    <div id="resultado1" style="margin-top:10px; font-weight:600;"></div>
+  </div>
+
+  <div class="form-group">
+    <label>Conversor 2: Precio → Gramos</label>
+    <div class="row">
+      <input type="number" id="precioDeseado" placeholder="Precio deseado">
+      <input type="number" id="precioLibra2" placeholder="Precio por libra">
+    </div>
+    <button onclick="convertirPrecioAGramos()">Calcular</button>
+    <div id="resultado2" style="margin-top:10px; font-weight:600;"></div>
+  </div>
+
+  <div class="form-group">
+    <label>Conversor 3: Gramos → Libras</label>
+    <input type="number" id="gramosLibras" placeholder="Gramos">
+    <button onclick="convertirGramosALibras()">Calcular</button>
+    <div id="resultado3" style="margin-top:10px; font-weight:600;"></div>
+  </div>
+</div>
+
+<div id="lista" class="seccion">
+  <h2>Lista de Productos</h2>
+  <button class="exportar" onclick="exportarExcel()">Exportar Excel</button>
+  <div id="productos"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+
+function mostrarSeccion(seccion) {
+  document.querySelectorAll('.seccion').forEach(div => div.style.display = 'none');
+  document.getElementById(seccion).style.display = 'block';
+  if (seccion === 'lista') mostrarProductos();
+}
+
+function registrarProducto() {
+  let nombre = document.getElementById('nombreProducto').value.trim();
+  let precio = parseFloat(document.getElementById('precioProducto').value);
+  let unidad = document.getElementById('unidadProducto').value;
+  let idEditar = document.getElementById('productoEditando').value;
+  if (!nombre || !precio) {
+    alert("Completa los campos");
+    return;
+  }
+  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  if (idEditar) {
+    productos[idEditar] = { nombre, precio, unidad };
+    document.getElementById('productoEditando').value = '';
+  } else {
+    productos.push({ nombre, precio, unidad });
+  }
+  localStorage.setItem('productos', JSON.stringify(productos));
+  limpiarFormulario();
+  alert("Producto guardado correctamente");
+  mostrarProductos();
+}
+
+function limpiarFormulario() {
+  document.getElementById('nombreProducto').value = '';
+  document.getElementById('precioProducto').value = '';
+  document.getElementById('unidadProducto').value = 'libra';
+}
+
+function mostrarProductos() {
+  let contenedor = document.getElementById('productos');
+  contenedor.innerHTML = '';
+  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  if (productos.length === 0) {
+    contenedor.innerHTML = '<p>No hay productos registrados.</p>';
+    return;
+  }
+  productos.forEach((prod, index) => {
+    let div = document.createElement('div');
+    div.className = 'producto';
+    div.innerHTML = `${prod.nombre} - ${prod.precio} COP por ${prod.unidad}
+      <div>
+        <button class="editar" onclick="editarProducto(${index})">Editar</button>
+        <button class="eliminar" onclick="eliminarProducto(${index})">Eliminar</button>
+      </div>`;
+    contenedor.appendChild(div);
+  });
+}
+
+function editarProducto(index) {
+  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  let p = productos[index];
+  document.getElementById('nombreProducto').value = p.nombre;
+  document.getElementById('precioProducto').value = p.precio;
+  document.getElementById('unidadProducto').value = p.unidad;
+  document.getElementById('productoEditando').value = index;
+  mostrarSeccion('registro');
+}
+
+function eliminarProducto(index) {
+  if (!confirm("¿Eliminar este producto?")) return;
+  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  productos.splice(index, 1);
+  localStorage.setItem('productos', JSON.stringify(productos));
+  mostrarProductos();
+}
+
+function exportarExcel() {
+  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  if (productos.length === 0) {
+    alert("No hay productos");
+    return;
+  }
+  const data = [
+    ["PRODUCTO", "PRECIO", "UNIDAD"],
+    ...productos.map(p => [p.nombre, p.precio, p.unidad])
+  ];
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Productos");
+  XLSX.writeFile(workbook, "productos.xlsx");
+}
+
+function convertirGramosPrecio() {
+  let gramos = parseFloat(document.getElementById('gramos').value);
+  let precioLibra = parseFloat(document.getElementById('precioLibra').value);
+  if (!gramos || !precioLibra) {
+    document.getElementById('resultado1').innerText = "Campos incompletos.";
+    return;
+  }
+  let precio = (gramos / 500) * precioLibra;
+  document.getElementById('resultado1').innerText = `Precio: ${precio.toFixed(2)} COP`;
+}
+
+function convertirPrecioAGramos() {
+  let precioDeseado = parseFloat(document.getElementById('precioDeseado').value);
+  let precioLibra = parseFloat(document.getElementById('precioLibra2').value);
+  if (!precioDeseado || !precioLibra) {
+    document.getElementById('resultado2').innerText = "Campos incompletos.";
+    return;
+  }
+  let gramos = (precioDeseado / precioLibra) * 500;
+  document.getElementById('resultado2').innerText = `Puedes comprar: ${gramos.toFixed(2)} gramos`;
+}
+
+function convertirGramosALibras() {
+  let gramos = parseFloat(document.getElementById('gramosLibras').value);
+  if (!gramos) {
+    document.getElementById('resultado3').innerText = "Ingresa los gramos.";
+    return;
+  }
+  let libras = gramos / 500;
+  document.getElementById('resultado3').innerText = `${libras.toFixed(2)} libras`;
+}
+</script>
+
+</body>
+</html>
