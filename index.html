@@ -119,26 +119,27 @@
 </head>
 <body>
 
-<header>Sistema de Tienda Avanzado</header>
+<header>Sistema de Tienda Avanzado GE</header>
 
 <div class="menu">
   <button onclick="mostrarSeccion('registro')">Registrar Producto</button>
   <button onclick="mostrarSeccion('conversores')">Conversores</button>
   <button onclick="mostrarSeccion('lista')">Lista de Productos</button>
+  <button onclick="mostrarSeccion('busqueda')">Buscar Producto</button>
 </div>
 
 <div id="registro" class="seccion">
   <h2>Registro de Productos</h2>
   <div class="form-group">
-    <label>Nombre del Producto</label>
+    <label for="nombreProducto">Nombre del Producto</label>
     <input type="text" id="nombreProducto">
   </div>
   <div class="form-group">
-    <label>Precio</label>
+    <label for="precioProducto">Precio</label>
     <input type="number" id="precioProducto">
   </div>
   <div class="form-group">
-    <label>Unidad</label>
+    <label for="unidadProducto">Unidad</label>
     <select id="unidadProducto">
       <option value="libra">Libra</option>
       <option value="unidad">Unidad</option>
@@ -154,7 +155,6 @@
 
 <div id="conversores" class="seccion">
   <h2>Conversores de Pesos</h2>
-
   <div class="form-group">
     <label>Conversor 1: Gramos → Precio</label>
     <div class="row">
@@ -164,7 +164,6 @@
     <button onclick="convertirGramosPrecio()">Calcular</button>
     <div id="resultado1" style="margin-top:10px; font-weight:600;"></div>
   </div>
-
   <div class="form-group">
     <label>Conversor 2: Precio → Gramos</label>
     <div class="row">
@@ -174,7 +173,6 @@
     <button onclick="convertirPrecioAGramos()">Calcular</button>
     <div id="resultado2" style="margin-top:10px; font-weight:600;"></div>
   </div>
-
   <div class="form-group">
     <label>Conversor 3: Gramos → Libras</label>
     <input type="number" id="gramosLibras" placeholder="Gramos">
@@ -189,38 +187,69 @@
   <div id="productos"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<div id="busqueda" class="seccion">
+  <h2>Buscar Producto</h2>
+  <div class="form-group">
+    <label for="buscarTexto">Nombre del producto</label>
+    <input type="text" id="buscarTexto" placeholder="Ej: Arroz, azúcar, leche..." oninput="buscarProducto()">
+  </div>
+  <div id="resultadosBusqueda"></div>
+</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
 
+function guardarSeccionActual(id) {
+  localStorage.setItem('seccionActual', id);
+}
+
+function obtenerProductos() {
+  try {
+    return JSON.parse(localStorage.getItem('productos') || '[]');
+  } catch (e) {
+    alert("Error al leer productos.");
+    return [];
+  }
+}
+
 function mostrarSeccion(seccion) {
   document.querySelectorAll('.seccion').forEach(div => div.style.display = 'none');
   document.getElementById(seccion).style.display = 'block';
+  guardarSeccionActual(seccion);
   if (seccion === 'lista') mostrarProductos();
 }
+
+window.onload = () => {
+  const lastSection = localStorage.getItem('seccionActual') || 'registro';
+  mostrarSeccion(lastSection);
+};
 
 function registrarProducto() {
   let nombre = document.getElementById('nombreProducto').value.trim();
   let precio = parseFloat(document.getElementById('precioProducto').value);
   let unidad = document.getElementById('unidadProducto').value;
   let idEditar = document.getElementById('productoEditando').value;
-  if (!nombre || !precio) {
-    alert("Completa los campos");
+  if (!nombre || isNaN(precio) || precio <= 0) {
+    alert("Completa los campos correctamente.");
     return;
   }
-  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  let productos = obtenerProductos();
   if (idEditar) {
     productos[idEditar] = { nombre, precio, unidad };
     document.getElementById('productoEditando').value = '';
   } else {
     productos.push({ nombre, precio, unidad });
   }
-  localStorage.setItem('productos', JSON.stringify(productos));
+  try {
+    localStorage.setItem('productos', JSON.stringify(productos));
+    alert("Producto guardado correctamente");
+  } catch (e) {
+    alert("Error al guardar el producto.");
+  }
   limpiarFormulario();
-  alert("Producto guardado correctamente");
   mostrarProductos();
 }
 
@@ -233,7 +262,7 @@ function limpiarFormulario() {
 function mostrarProductos() {
   let contenedor = document.getElementById('productos');
   contenedor.innerHTML = '';
-  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  let productos = obtenerProductos();
   if (productos.length === 0) {
     contenedor.innerHTML = '<p>No hay productos registrados.</p>';
     return;
@@ -251,7 +280,7 @@ function mostrarProductos() {
 }
 
 function editarProducto(index) {
-  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  let productos = obtenerProductos();
   let p = productos[index];
   document.getElementById('nombreProducto').value = p.nombre;
   document.getElementById('precioProducto').value = p.precio;
@@ -262,14 +291,14 @@ function editarProducto(index) {
 
 function eliminarProducto(index) {
   if (!confirm("¿Eliminar este producto?")) return;
-  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  let productos = obtenerProductos();
   productos.splice(index, 1);
   localStorage.setItem('productos', JSON.stringify(productos));
   mostrarProductos();
 }
 
 function exportarExcel() {
-  let productos = JSON.parse(localStorage.getItem('productos') || '[]');
+  let productos = obtenerProductos();
   if (productos.length === 0) {
     alert("No hay productos");
     return;
@@ -314,6 +343,32 @@ function convertirGramosALibras() {
   }
   let libras = gramos / 500;
   document.getElementById('resultado3').innerText = `${libras.toFixed(2)} libras`;
+}
+
+function buscarProducto() {
+  const termino = document.getElementById('buscarTexto').value.toLowerCase().trim();
+  const resultados = document.getElementById('resultadosBusqueda');
+  resultados.innerHTML = '';
+
+  if (termino === '') {
+    resultados.innerHTML = '<p>Escribe un nombre para buscar.</p>';
+    return;
+  }
+
+  const productos = obtenerProductos();
+  const encontrados = productos.filter(p => p.nombre.toLowerCase().includes(termino));
+
+  if (encontrados.length === 0) {
+    resultados.innerHTML = '<p>No se encontraron productos.</p>';
+    return;
+  }
+
+  encontrados.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'producto';
+    div.innerText = `${p.nombre} - ${p.precio} COP por ${p.unidad}`;
+    resultados.appendChild(div);
+  });
 }
 </script>
 
