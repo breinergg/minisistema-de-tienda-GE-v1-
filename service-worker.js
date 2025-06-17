@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tienda-avanzado-v1';
+const CACHE_NAME = 'tienda-avanzado-v2';
 const urlsToCache = [
   '/',
   '/index.html',
